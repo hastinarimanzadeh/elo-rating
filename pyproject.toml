@@ -1,0 +1,17 @@
+[project]
+name = "elo-rating"
+version = "0.0.1"
+description="An implementation of Elo rating system for use in comparative crowdsourcing tasks"
+authors = [{name="Hasti Narimanzadeh", email="hasti.nz@gmail.com"}]
+requires-python = ">=3.8"
+license = {text = "MIT"}
+readme = "README.md"
+keywords = ["Elo", "Crowdsourcing", "Ranking"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Information Analysis"
+]
