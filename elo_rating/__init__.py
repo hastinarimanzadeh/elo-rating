@@ -1,5 +1,6 @@
 import math
 
+
 class Elo:
     def __init__(self, ratings=None, denom=1.0):
         if not ratings:
@@ -19,7 +20,6 @@ class Elo:
         if player2 not in self.__ratings:
             self.__ratings[player2] = default_rating
 
-        updated_ratings = self.__ratings
         e1 = self.expected_score(player1, player2)
         e2 = 1 - e1
         self.__ratings[player1] = self.__new_rating(
@@ -34,7 +34,7 @@ class Elo:
 
     def ratings(self):
         return self.__ratings
-    
+ 
     def rating(self, player):
         return self.__ratings[player]
 
@@ -51,9 +51,8 @@ class Elo:
 
     def __new_rating(
             self,
-            current_rating: float, 
+            current_rating: float,
             real_score: float,
-            expected_score: float, 
+            expected_score: float,
             k: int):
         return current_rating + k*(real_score - expected_score)
-
