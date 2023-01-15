@@ -1,4 +1,5 @@
 # Reference implementation of Elo rating system 
+[![Python package](https://github.com/hastinarimanzadeh/elo-rating/actions/workflows/python-package.yml/badge.svg)](https://github.com/hastinarimanzadeh/elo-rating/actions/workflows/python-package.yml)
 
 ## Installation
 ```bash
