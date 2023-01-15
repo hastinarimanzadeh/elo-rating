@@ -1,6 +1,6 @@
 [project]
-name = "elo-rating"
-version = "0.0.1"
+name = "elo_rating"
+version = "0.0.2"
 description="An implementation of Elo rating system for use in comparative crowdsourcing tasks"
 authors = [{name="Hasti Narimanzadeh", email="hasti.nz@gmail.com"}]
 requires-python = ">=3.8"

@@ -1,83 +1,59 @@
-from enum import Enum
+import math
 
-class Answer(Enum):
-    left = "left"
-    right = "right"
-    equal = "equal"
+class Elo:
+    def __init__(self, ratings=None, denom=1.0):
+        if not ratings:
+            ratings = {}
+        self.__ratings = ratings
+        self.__denom = denom
 
-class Player(Enum):
-    player_a = "playerA"
-    player_b = "playerB"
+    # expected score of player 1
+    def expected_score(self, player1, player2):
+        r1 = self.__ratings[player1]
+        r2 = self.__ratings[player2]
+        return 1/(1 + math.e**((r2 - r1)/self.__denom))
 
-class Result(Enum):
-    win = 1
-    lose = 0
-    tie = 0.5
+    def add_match(self, player1, player2, result, k=0.1, default_rating=0):
+        if player1 not in self.__ratings:
+            self.__ratings[player1] = default_rating
+        if player2 not in self.__ratings:
+            self.__ratings[player2] = default_rating
 
-def expected_score(ra, rb):
-    return 1/(1 + 10**((ra - rb)/400))
+        updated_ratings = self.__ratings
+        e1 = self.expected_score(player1, player2)
+        e2 = 1 - e1
+        self.__ratings[player1] = self.__new_rating(
+                self.__ratings[player1], result, e1, k)
+        self.__ratings[player2] = self.__new_rating(
+                self.__ratings[player2], 1 - result, e2, k)
 
-def update_rating(r: float, real_score: float,
-        expected_score:float, k_value: int):
-    return r + k_value*(real_score - expected_score)
+    def add_matches(self, matches: list, k=0.1, default_rating=0):
+        for m in matches:
+            player1, player2, result = m
+            self.add_match(player1, player2, result, k, default_rating)
 
-def make_match(task: dict, answer: dict):
-    """ make a single elo match for a task and its corresponding answer """
-    elo_match = {}
-    elo_match[Player.player_a] = task["tweet1"]
-    elo_match[Player.player_b] = task["tweet2"]
+    def ratings(self):
+        return self.__ratings
+    
+    def rating(self, player):
+        return self.__ratings[player]
 
-    if answer["answer"][0]["selection"] == Answer.left.value:
-        elo_match["SA"] = Result.win.value
-        elo_match["SB"] = Result.lose.value
+    def items(self):
+        return list(self.__ratings.keys())
 
-    elif answer["answer"][0]["selection"] == Answer.right.value:
-        elo_match["SA"] = Result.lose.value
-        elo_match["SB"] = Result.win.value
+    def rankings(self):
+        players = sorted(self.__ratings)
+        players_sorted = sorted(players, key=self.__ratings.get, reverse=True)
+        return {u: r for r, u in enumerate(players_sorted)}
 
-    elif answer["answer"][0]["selection"] == Answer.equal.value:
-        elo_match["SA"] = Result.tie.value
-        elo_match["SB"] = Result.tie.value
+    def ranking(self, player):
+        return self.rankings()[player]
 
-    else:
-        print(answer)
-        print(elo_match)
-        raise RuntimeError("bad match")
+    def __new_rating(
+            self,
+            current_rating: float, 
+            real_score: float,
+            expected_score: float, 
+            k: int):
+        return current_rating + k*(real_score - expected_score)
 
-    return elo_match
-
-def elo(match: dict, ratings, k):
-    updated_ratings = ratings#.copy()
-    tweet_id_a = match[Player.player_a]
-    tweet_id_b = match[Player.player_b]
-    ea = expected_score(updated_ratings[tweet_id_b],
-            updated_ratings[tweet_id_a])
-    eb = expected_score(updated_ratings[tweet_id_a],
-            updated_ratings[tweet_id_b])
-    updated_ratings[tweet_id_a] = update_rating(
-            updated_ratings[tweet_id_a], match["SA"], ea, k)
-    updated_ratings[tweet_id_b] = update_rating(
-            updated_ratings[tweet_id_b], match["SB"], eb, k)
-
-    return updated_ratings
-
-def ratings_distance(rating1, rating2):
-    if set(rating1) != set(rating2):
-        raise RuntimeError("conversations are different!")
-    size = len(rating1)
-    return sum([(rating1[tid] - rating2[tid])**2 for tid in rating1])/size
-
-def rankings_distance(rating1, rating2):
-    if set(rating1) != set(rating2):
-        raise RuntimeError("conversations are different!")
-    root_tweet_ids = sorted(set(rating1))
-    size = len(rating1)
-
-    rankings1 = get_ranking(rating1)
-    rankings2 = get_ranking(rating2)
-    return sum((rankings2[u] - rankings1[u])**2 for u in root_tweet_ids)/size
-
-def get_ranking(rating):
-    root_tweet_ids = sorted(set(rating))
-    convs_sorted = sorted(root_tweet_ids, key=rating.get, reverse=True)
-    return {u: r for r, u in enumerate(convs_sorted)}
